@@ -63,7 +63,7 @@ void PsytranceAcidGeneratorAudioProcessor::processBlock(juce::AudioBuffer<float>
     const float drive=*apvts.getRawParameterValue("drive");
     const float sub=*apvts.getRawParameterValue("sub");
     const float accent=*apvts.getRawParameterValue("accent");
-    const int div=(int)*apvts.getRawParameterValue("tempoDiv");
+    playing = pos->getIsPlaying();
     const int nSteps=(int)*apvts.getRawParameterValue("steps");
     const float gate=*apvts.getRawParameterValue("gate");
     const float delayMix=*apvts.getRawParameterValue("delayMix");
