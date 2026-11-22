@@ -17,6 +17,7 @@ juce_add_plugin(PsytranceAcidGenerator
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE)
+juce_generate_juce_header(PsytranceAcidGenerator)
 target_sources(PsytranceAcidGenerator PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginEditor.cpp)
