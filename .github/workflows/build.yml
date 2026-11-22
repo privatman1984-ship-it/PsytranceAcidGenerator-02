@@ -1,1 +1,76 @@
+name: Build VST3 for Windows
 
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows-vst3:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure Visual Studio
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure CMake
+        shell: pwsh
+        working-directory: PsytranceAcidGenerator 02
+        run: >
+          cmake -S . -B build
+          -G "Visual Studio 17 2022"
+          -A x64
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build VST3
+        shell: pwsh
+        working-directory: PsytranceAcidGenerator 02
+        run: >
+          cmake --build build
+          --config Release
+          --target PsytranceAcidGenerator_VST3
+          --parallel
+
+      - name: Collect VST3 artifact
+        shell: pwsh
+        working-directory: PsytranceAcidGenerator 02
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $artifact = "PsytranceAcidGenerator-VST3-Windows"
+          Remove-Item -Path $artifact -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $artifact -Force | Out-Null
+
+          $bundles = Get-ChildItem -Path "build" -Filter "*.vst3" -Recurse |
+            Where-Object { $_.PSIsContainer }
+
+          if ($bundles.Count -eq 0) {
+            throw "No VST3 bundle was produced"
+          }
+
+          foreach ($bundle in $bundles) {
+            Copy-Item -Path $bundle.FullName `
+              -Destination $artifact `
+              -Recurse `
+              -Force
+          }
+
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: PsytranceAcidGenerator-VST3-Windows
+          path: PsytranceAcidGenerator 02/PsytranceAcidGenerator-VST3-Windows
+          if-no-files-found: error
+          retention-days: 30
