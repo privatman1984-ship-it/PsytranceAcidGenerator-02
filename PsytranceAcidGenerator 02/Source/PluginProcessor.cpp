@@ -49,33 +49,48 @@ void PsytranceAcidGeneratorAudioProcessor::processBlock(juce::AudioBuffer<float>
 {
     juce::ScopedNoDenormals noDenormals;
     b.clear();
-    auto playHead=getPlayHead();
-    double bpm=120.0; bool playing=true; double ppq=0.0;
-    if(playHead) if(auto pos=playHead->getPosition()) {
-        if(pos->getBpm()) bpm=*pos->getBpm();
-        if(pos->getIsPlaying()) playing=*pos->getIsPlaying();
-        if(pos->getPpqPosition()) ppq=*pos->getPpqPosition();
+        auto playHead = getPlayHead();
+    double bpm = 120.0;
+    bool playing = true;
+    double ppq = 0.0;
+
+    if (playHead)
+    {
+        if (auto pos = playHead->getPosition())
+        {
+            if (pos->getBpm())
+                bpm = *pos->getBpm();
+
+            playing = pos->getIsPlaying();
+
+            if (pos->getPpqPosition())
+                ppq = *pos->getPpqPosition();
+        }
     }
-    const float cutoff=*apvts.getRawParameterValue("cutoff");
-    const float resonance=*apvts.getRawParameterValue("res");
-    const float envAmt=*apvts.getRawParameterValue("env");
-    const float decay=*apvts.getRawParameterValue("decay");
-    const float drive=*apvts.getRawParameterValue("drive");
-    const float sub=*apvts.getRawParameterValue("sub");
-    const float accent=*apvts.getRawParameterValue("accent");
-    playing = pos->getIsPlaying();
-    const int nSteps=(int)*apvts.getRawParameterValue("steps");
-    const float gate=*apvts.getRawParameterValue("gate");
-    const float delayMix=*apvts.getRawParameterValue("delayMix");
-    const int delayDiv=(int)*apvts.getRawParameterValue("delayTime");
-    const float feedback=*apvts.getRawParameterValue("feedback");
-    const float width=*apvts.getRawParameterValue("panWidth");
-    const float lfoRate=*apvts.getRawParameterValue("lfoRate");
-    const float lfoDepth=*apvts.getRawParameterValue("lfoDepth");
-    const float voc=*apvts.getRawParameterValue("vocoder");
-    const float master=*apvts.getRawParameterValue("master");
-    const int wave=(int)*apvts.getRawParameterValue("wave");
-    const double stepBeats=div==0?0.25:div==1?0.5:div==2?1.0:div==3?2.0:div==4?4.0:0.125;
+
+    const float cutoff = *apvts.getRawParameterValue("cutoff");
+    const float resonance = *apvts.getRawParameterValue("res");
+    const float envAmt = *apvts.getRawParameterValue("env");
+    const float decay = *apvts.getRawParameterValue("decay");
+    const float drive = *apvts.getRawParameterValue("drive");
+    const float sub = *apvts.getRawParameterValue("sub");
+    const float accent = *apvts.getRawParameterValue("accent");
+    const int nSteps = (int) *apvts.getRawParameterValue("steps");
+    const float gate = *apvts.getRawParameterValue("gate");
+    const float delayMix = *apvts.getRawParameterValue("delayMix");
+    const int delayDiv = (int) *apvts.getRawParameterValue("delayTime");
+    const float feedback = *apvts.getRawParameterValue("feedback");
+    const float width = *apvts.getRawParameterValue("panWidth");
+    const float lfoRate = *apvts.getRawParameterValue("lfoRate");
+    const float lfoDepth = *apvts.getRawParameterValue("lfoDepth");
+    const float voc = *apvts.getRawParameterValue("vocoder");
+    const float master = *apvts.getRawParameterValue("master");
+    const int wave = (int) *apvts.getRawParameterValue("wave");
+    const int div = (int) *apvts.getRawParameterValue("tempoDiv");
+
+    const double stepBeats =
+        div == 0 ? 0.25 : div == 1 ? 0.5 : div == 2 ? 1.0 :
+        div == 3 ? 2.0 : div == 4 ? 4.0 : 0.125;
     const int stepSamples=juce::jmax(1,(int)(sampleRate*60.0/bpm*stepBeats));
     const float delayBeats=delayDiv==0?0.25f:delayDiv==1?0.5f:delayDiv==2?1.f:delayDiv==3?2.f:delayDiv==4?4.f:delayDiv==5?0.75f:1.5f;
     const int delaySamples=juce::jlimit(1,191999,(int)(sampleRate*60.0/bpm*delayBeats));
